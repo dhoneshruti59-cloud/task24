@@ -4,12 +4,16 @@ import joblib
 
 st.set_page_config(page_title="Multi Model Prediction App", layout="centered")
 
-st.title("Classification and Regression prediction App")
+st.title("🏥 Heart Disease & Insurance Prediction")
 
 problem = st.selectbox(
     "Select Problem Type",
     ["Classification", "Regression"]
 )
+
+# ==========================================================
+# CLASSIFICATION
+# ==========================================================
 
 if problem == "Classification":
 
@@ -28,51 +32,102 @@ if problem == "Classification":
     scaler = joblib.load("models/scaler.pkl")
     columns = joblib.load("models/columns.pkl")
 
-    st.header("Enter Input Values")
+    st.header("Enter Patient Details")
 
-    Age = st.number_input("Age", 18, 100, 40)
-    RestingBP = st.number_input("RestingBP", 50, 250, 120)
-    Cholesterol = st.number_input("Cholesterol", 0, 700, 200)
-    FastingBS = st.number_input("FastingBS (0/1)", 0, 1, 0)
-    MaxHR = st.number_input("MaxHR", 50, 250, 150)
-    Oldpeak = st.number_input("Oldpeak", 0.0, 10.0, 1.0)
+    Age = st.number_input("Age", 1, 120, 30)
 
-    Sex = st.selectbox("Sex", ["Male", "Female"])
-    ChestPainType = st.selectbox("ChestPainType", ["ATA","NAP","ASY","TA"])
-    RestingECG = st.selectbox("RestingECG", ["Normal","ST","LVH"])
-    ExerciseAngina = st.selectbox("ExerciseAngina", ["Yes","No"])
-    ST_Slope = st.selectbox("ST_Slope", ["Up","Flat","Down"])
+    Sex = st.selectbox("Sex", ["M", "F"])
 
-    if st.button("Predict Classification"):
+    ChestPainType = st.selectbox(
+        "Chest Pain Type",
+        ["ATA", "NAP", "ASY", "TA"]
+    )
 
-        data = pd.DataFrame({
-            "Age":[Age],
-            "Sex":[Sex],
-            "ChestPainType":[ChestPainType],
-            "RestingBP":[RestingBP],
-            "Cholesterol":[Cholesterol],
-            "FastingBS":[FastingBS],
-            "RestingECG":[RestingECG],
-            "MaxHR":[MaxHR],
-            "ExerciseAngina":[ExerciseAngina],
-            "Oldpeak":[Oldpeak],
-            "ST_Slope":[ST_Slope]
-        })
+    RestingBP = st.number_input(
+        "Resting BP",
+        50,
+        250,
+        120
+    )
 
-        data = pd.get_dummies(data)
+    Cholesterol = st.number_input(
+        "Cholesterol",
+        0,
+        700,
+        200
+    )
 
-        data = data.reindex(columns=columns, fill_value=0)
+    FastingBS = st.selectbox(
+        "Fasting Blood Sugar",
+        [0,1]
+    )
 
-        data = scaler.transform(data)
+    RestingECG = st.selectbox(
+        "Resting ECG",
+        ["Normal","ST","LVH"]
+    )
 
-        prediction = model.predict(data)
+    MaxHR = st.number_input(
+        "Max Heart Rate",
+        50,
+        250,
+        150
+    )
+
+    ExerciseAngina = st.selectbox(
+        "Exercise Angina",
+        ["Y","N"]
+    )
+
+    Oldpeak = st.number_input(
+        "Oldpeak",
+        0.0,
+        10.0,
+        1.0
+    )
+
+    ST_Slope = st.selectbox(
+        "ST Slope",
+        ["Up","Flat","Down"]
+    )
+
+    user_data = pd.DataFrame({
+
+        "Age":[Age],
+        "Sex":[Sex],
+        "ChestPainType":[ChestPainType],
+        "RestingBP":[RestingBP],
+        "Cholesterol":[Cholesterol],
+        "FastingBS":[FastingBS],
+        "RestingECG":[RestingECG],
+        "MaxHR":[MaxHR],
+        "ExerciseAngina":[ExerciseAngina],
+        "Oldpeak":[Oldpeak],
+        "ST_Slope":[ST_Slope]
+
+    })
+
+    user_data = pd.get_dummies(user_data, drop_first=True)
+
+    user_data = user_data.reindex(
+        columns=columns,
+        fill_value=0
+    )
+
+    user_data = scaler.transform(user_data)
+
+    if st.button("Predict"):
+
+        prediction = model.predict(user_data)
 
         if prediction[0] == 1:
-            st.success("Heart Disease Detected")
+            st.success("Heart Disease Present")
         else:
             st.success("No Heart Disease")
 
-
+# ==========================================================
+# REGRESSION
+# ==========================================================
 
 else:
 
@@ -88,45 +143,78 @@ else:
 
     model = joblib.load(f"models/{model_name}.pkl")
     scaler = joblib.load("models/reg_scaler.pkl")
+    columns = joblib.load("models/reg_columns.pkl")
 
-    st.header("Enter Input Values")
+    st.header("Insurance Details")
 
-    Age = st.number_input("Age", 18, 100, 40)
-    RestingBP = st.number_input("RestingBP", 50, 250, 120)
-    FastingBS = st.number_input("FastingBS", 0, 1, 0)
-    MaxHR = st.number_input("MaxHR", 50, 250, 150)
-    Oldpeak = st.number_input("Oldpeak", 0.0, 10.0, 1.0)
+    age = st.number_input(
+        "Age",
+        18,
+        100,
+        25
+    )
 
-    Sex = st.selectbox("Sex ", ["Male","Female"])
-    ChestPainType = st.selectbox("ChestPainType ", ["ATA","NAP","ASY","TA"])
-    RestingECG = st.selectbox("RestingECG ", ["Normal","ST","LVH"])
-    ExerciseAngina = st.selectbox("ExerciseAngina ", ["Yes","No"])
-    ST_Slope = st.selectbox("ST_Slope ", ["Up","Flat","Down"])
+    sex = st.selectbox(
+        "Sex",
+        ["male","female"]
+    )
 
-    if st.button("Predict Regression"):
+    bmi = st.number_input(
+        "BMI",
+        10.0,
+        60.0,
+        25.0
+    )
 
-        data = pd.DataFrame({
-            "Age":[Age],
-            "Sex":[Sex],
-            "ChestPainType":[ChestPainType],
-            "RestingBP":[RestingBP],
-            "FastingBS":[FastingBS],
-            "RestingECG":[RestingECG],
-            "MaxHR":[MaxHR],
-            "ExerciseAngina":[ExerciseAngina],
-            "Oldpeak":[Oldpeak],
-            "ST_Slope":[ST_Slope]
-        })
+    children = st.number_input(
+        "Children",
+        0,
+        10,
+        0
+    )
 
-        data = pd.get_dummies(data)
+    smoker = st.selectbox(
+        "Smoker",
+        ["yes","no"]
+    )
 
-        while data.shape[1] < model.n_features_in_:
-            data[f"dummy{data.shape[1]}"] = 0
+    region = st.selectbox(
+        "Region",
+        [
+            "northeast",
+            "northwest",
+            "southeast",
+            "southwest"
+        ]
+    )
 
-        data = data.iloc[:, :model.n_features_in_]
+    user_data = pd.DataFrame({
 
-        data = scaler.transform(data)
+        "age":[age],
+        "sex":[sex],
+        "bmi":[bmi],
+        "children":[children],
+        "smoker":[smoker],
+        "region":[region]
 
-        prediction = model.predict(data)
+    })
 
-        st.success(f"Predicted Cholesterol : {prediction[0]:.2f}")
+    user_data = pd.get_dummies(
+        user_data,
+        drop_first=True
+    )
+
+    user_data = user_data.reindex(
+        columns=columns,
+        fill_value=0
+    )
+
+    user_data = scaler.transform(user_data)
+
+    if st.button("Predict"):
+
+        prediction = model.predict(user_data)
+
+        st.success(
+            f"Predicted Insurance Expense : ₹ {prediction[0]:.2f}"
+        )
